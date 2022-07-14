@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 import argparse
 import glob
 import os
+import numpy as np
 
 def get_parser():
     parser = argparse.ArgumentParser(description="fig2gif")
@@ -25,10 +26,11 @@ def main():
         images[i].putalpha(255)
         draw = ImageDraw.Draw(images[i])
         draw.text((images[i].size[0]-size[0]-30, images[i].size[1]-size[1]-10), text, font=font, fill=(0,0,0))
+        images[i] = Image.fromarray(np.array(images[i])[:, :, :3])
         images[i].save("{}/tmp/{:04}.png".format(args.input, i))
 
     files = sorted(glob.glob("{}/tmp/*.png".format(args.input)))
-    images = list(map(lambda file: Image.open(file).quantize(), files))
+    images = list(map(lambda file: Image.open(file).quantize(method=0), files))
 
     images[0].save("{}/output.gif".format(args.input), save_all=True, append_images=images[1:], duration=args.duration, disposal=2, optimize=False, loop=0)
 
